@@ -131,8 +131,9 @@ class NesT(nn.Module):
 
         self.T = nn.ModuleDict(
             {str(i): nn.ModuleDict(
-                {str(j): nn.ModuleList([Encoder_Layer(dim=self.dim, head=self.head, inter_dim=self.dim)
-                                        for _ in range(self.depth)])
+                {str(j): nn.ModuleList(
+                    [Encoder_Layer(dim=self.dim, head=self.head, inter_dim=self.dim, dropout_ratio=self.dropout_ratio)
+                     for _ in range(self.depth)])
                  for j in range(self.block_num[i])}) for i in self.block_num})
         self.GlobalAvgPool = nn.AdaptiveAvgPool2d(1)
         self.classifier = nn.Linear(self.dim, self.num_classes)
