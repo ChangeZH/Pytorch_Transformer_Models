@@ -83,11 +83,11 @@ class NesT(nn.Module):
 
     def __init__(self,
                  num_classes=10,
-                 input_size=64,
+                 input_size=32,
                  patch_size=1,
-                 depth=4,
+                 depth=3,
                  dim=192,
-                 block_depth=[4, 4, 4, 4],
+                 block_depth=[4, 4, 4],
                  head=3,
                  dropout_ratio=0.1):
         super(NesT, self).__init__()
