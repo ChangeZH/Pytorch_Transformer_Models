@@ -83,7 +83,8 @@ class NesT(nn.Module):
 
     def __init__(self,
                  num_classes=10,
-                 input_size=32,
+                 input_size=224,
+                 input_channel=3,
                  patch_size=1,
                  depth=3,
                  dim=192,
@@ -93,6 +94,7 @@ class NesT(nn.Module):
         super(NesT, self).__init__()
         self.num_classes = num_classes
         self.input_size = input_size
+        self.input_channel = input_channel
         self.patch_size = patch_size
         self.depth = depth
         self.dim = dim
@@ -104,7 +106,7 @@ class NesT(nn.Module):
         self.agg_index = [i for i in range(len(self.block_depth) - 1)]
         self.PatchEmbed = nn.Sequential(
             Rearrange('b c (p1 w) (p2 h) -> b (p1 p2) (c w h)', w=self.patch_size, h=self.patch_size),
-            nn.Linear(self.patch_size ** 2, self.dim))
+            nn.Linear(self.patch_size ** 2 * self.input_channel, self.dim))
         self.pos_encodings = {nn.Parameter(torch.zeros(self.block_num[i], self.dim)) for i in self.block_num}
         self.Block = {str(i): Rearrange('b (k p) d -> b k p d', k=self.block_num[i]) for i in self.block_num}
         self.UnBlock = {str(i): nn.Sequential(Rearrange('b k p d -> b (k p) d'),
@@ -134,7 +136,7 @@ class NesT(nn.Module):
                 {str(j): nn.ModuleList(
                     [Encoder_Layer(dim=self.dim, head=self.head, inter_dim=self.dim, dropout_ratio=self.dropout_ratio)
                      for _ in range(self.depth)])
-                 for j in range(self.block_num[i])}) for i in self.block_num})
+                    for j in range(self.block_num[i])}) for i in self.block_num})
         self.GlobalAvgPool = nn.AdaptiveAvgPool2d(1)
         self.classifier = nn.Linear(self.dim, self.num_classes)
 
@@ -146,12 +148,12 @@ class NesT(nn.Module):
             z[_] = self.Agg_Block_Conv[i][_](z[_])
         z = torch.stack([z[j] for j in z], dim=1)
         z = self.Agg_UnBlock[i](z)
-        z = self.Agg_Image_Conv[i](z).permute(0, 2, 3, 1).reshape(self.batch_size, -1, self.dim)
+        z = self.Agg_Image_Conv[i](z).permute(0, 2, 3, 1).reshape(self.batchsize, -1, self.dim)
         z = self.Block[str(int(i) + 1)](z)
         return z
 
     def forward(self, feats):
-        self.batch_size = feats.shape[0]
+        self.batchsize = feats.shape[0]
         ids = [str(i) for i in range(self.depth)]
         feats = self.PatchEmbed(feats)
         feats = self.Block['0'](feats)
@@ -163,6 +165,13 @@ class NesT(nn.Module):
             feats = torch.stack([feats[j] for j in feats], dim=1)
             if ids.index(i) < len(ids) - 1:
                 feats = self.Aggregate(feats, i)
-        feats = self.GlobalAvgPool(feats.permute(0, 3, 1, 2)).squeeze()
-        feats = self.classifier(feats)
+        feats = self.GlobalAvgPool(feats.permute(0, 3, 1, 2))
+        feats = self.classifier(feats.reshape(self.batchsize, -1))
         return feats
+
+
+if __name__ == '__main__':
+    model = NesT()
+    inputs = torch.ones(3, 1, 32, 32)
+    outputs = model(inputs)
+    print(outputs.shape)
