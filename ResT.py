@@ -68,10 +68,21 @@ class EMSA(nn.Module):
                                                 kernel_size=3, stride=2, padding=1),
                                       Rearrange('b c w h -> b (w h) c'),
                                       nn.LayerNorm(normalized_shape=2 * self.dim))
+
+        self.num_features = (self.input_size / (2 ** (self.stage + 2))) ** 2 * (
+                self.input_size / (2 ** (self.stage + 3))) ** 2 if self.input_size / (
+                2 ** (self.stage + 3)) % 4 == 0 else (self.input_size / (2 ** (self.stage + 2))) ** 2 * int(
+            self.input_size / (2 ** (self.stage + 3)) + 1) ** 2
+
+        self.Conv = nn.Sequential(nn.Conv2d(in_channels=2 ** self.stage, out_channels=2 ** self.stage,
+                                            kernel_size=3, stride=1, padding=1),
+                                  nn.Softmax(-1),
+                                  nn.InstanceNorm2d(num_features=int(self.num_features)))
         self.softmax = nn.Softmax(-1)
         self.fc_out = nn.Sequential(
             nn.Linear(dim, dim, bias=False),
             nn.Dropout(dropout_ratio)
+
         )
 
     def forward(self, feats):
@@ -80,8 +91,11 @@ class EMSA(nn.Module):
         q, k, v = rearrange(q, 'b n (h d) -> b n h d', h=self.head), \
                   rearrange(k, 'b n (h d) -> b n h d', h=self.head), \
                   rearrange(v, 'b n (h d) -> b n h d', h=self.head)
+        print(q.shape, k.shape, v.shape, self.dim, int(self.input_size // 2 ** (self.stage + 2)), 2 ** self.stage)
         alpha = einsum('b i h d, b j h d -> b h i j', q, k) * self.scale
-        att = self.softmax(alpha)
+        print(alpha.shape, self.Conv)
+        att = self.Conv(alpha)
+        # att = self.softmax(alpha)
         out = einsum('b h i j, b j h d -> b h i d', att, v)
         out = rearrange(out, 'b h n d -> b n (h d)')
         out = self.fc_out(out)

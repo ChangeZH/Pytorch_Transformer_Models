@@ -53,9 +53,9 @@ class Self_Attention(nn.Module):
         q, k, v = rearrange(q, 'b n (h d) -> b n h d', h=self.head), \
                   rearrange(k, 'b n (h d) -> b n h d', h=self.head), \
                   rearrange(v, 'b n (h d) -> b n h d', h=self.head)
-        alpha = einsum('b h i d, b h j d -> b h i j', q, k) * self.scale
+        alpha = einsum('b i h d, b j h d -> b h i j', q, k) * self.scale
         att = self.softmax(alpha)
-        out = einsum('b h i j, b h j d -> b h i d', att, v)
+        out = einsum('b h i j, b j h d -> b i h d', att, v)
         out = rearrange(out, 'b n h d -> b n (h d)')
         return self.fc_out(out)
 
