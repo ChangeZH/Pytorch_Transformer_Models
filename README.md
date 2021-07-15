@@ -18,27 +18,28 @@ pip install tqdm pyyaml tensorboardX opencv-python
 ## 参数设置 / Parameter Setting  
 
 ```python
---project #项目名，即在
---save_path #下生成文件夹名称
---model_config
---dataset_config
---train
---val
---test
---test_img_path
---topk
---devices
---batch_size
---max_epochs
---val_interval
---save_path
---resume
---weight
---lr
---gamma
---milestones
+--project # 项目名，即在--save_path下生成文件夹名称
+--model_config # 模型配置文件
+--dataset_config # 数据集配置文件
+--train # 训练模式
+--val # 验证模式
+--test # 测试模式
+--test_img_path # 测试文件夹路径
+--topk # 测试结果保存为top-k，当k=5即top5
+--devices # 运行gpu位置
+--batch_size # 运行batch大小
+--max_epochs # 训练最大代数
+--val_interval # 每次测试、保存权重所隔代数
+--save_path # 运行保存路径
+--resume # 继续训练加载权重路径
+--weight # 加载权重路径
+--lr # 学习率
+--gamma # 学习率衰减率
+--milestones # 学习率衰减里程碑
 ```
 
-## 训练 / Training  
+## 运行 / Running
 
 运行  ` python run.py --train `  进行训练。  
+运行  ` python run.py --val `  进行验证。  
+运行  ` python run.py --test `  进行测试。  
