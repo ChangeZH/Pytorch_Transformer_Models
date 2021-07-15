@@ -7,7 +7,7 @@
 conda create -n PTM python=3.7 -y  
 conda activate PTM  
 conda install pytorch torchvision cudatoolkit -c pytorch  
-pip install tqdm pyyaml tensorboardX opencv-python  
+pip install tqdm pyyaml tensorboardX prettytable pillow einops  
 ```
 
 ## 支持模型 / Models
