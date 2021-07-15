@@ -1,0 +1,4 @@
+root_path: ./datasets/CIFAR10/
+num_classes: 10
+input_size: 224
+input_channel: 3

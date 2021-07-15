@@ -1,0 +1,4 @@
+root_path: ./datasets/CIFAR100/
+num_classes: 100
+input_size: 224
+input_channel: 3

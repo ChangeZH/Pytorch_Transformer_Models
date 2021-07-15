@@ -1,0 +1,10 @@
+model_type: SwinT
+num_classes: 10
+input_size: 224
+input_channels: 3
+patch_size: 4
+dim: 128
+depth: [ 2, 2, 18, 2 ]
+head: [ 4, 8, 16, 32 ]
+win_size: 7
+dropout_ratio: 0

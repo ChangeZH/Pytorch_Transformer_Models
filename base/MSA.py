@@ -59,7 +59,8 @@ class EMSA(nn.Module):
         self.trans_kv = nn.Sequential(Rearrange('b (w h) c -> b c w h', w=int(self.input_size // 2 ** (self.stage + 2)),
                                                 h=int(self.input_size // 2 ** (self.stage + 2))),
                                       nn.Conv2d(in_channels=self.dim, out_channels=2 * self.dim,
-                                                kernel_size=3, stride=2, padding=1),
+                                                kernel_size=int(8 / self.head) + 1, stride=int(8 / self.head),
+                                                padding=int(4 / self.head + .5)),
                                       Rearrange('b c w h -> b (w h) c'),
                                       nn.LayerNorm(normalized_shape=2 * self.dim))
 
@@ -86,7 +87,7 @@ class EMSA(nn.Module):
                   rearrange(k, 'b n (h d) -> b n h d', h=self.head), \
                   rearrange(v, 'b n (h d) -> b n h d', h=self.head)
         alpha = einsum('b i h d, b j h d -> b h i j', q, k) * self.scale
-        att = self.Conv(alpha)
+        alpha = self.Conv(alpha)
         att = self.softmax(alpha)
         out = einsum('b h i j, b j h d -> b h i d', att, v)
         out = rearrange(out, 'b h n d -> b n (h d)')

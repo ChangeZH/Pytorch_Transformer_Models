@@ -23,15 +23,16 @@ class SwinT(nn.Module):
     """docstring for SwinT"""
 
     def __init__(self,
-                 num_classes=10,
-                 input_size=224,
-                 input_channels=3,
-                 patch_size=4,
-                 dim=96,
-                 depth=[2, 2, 6, 2],
-                 head=[3, 6, 12, 24],
-                 win_size=7,
-                 dropout_ratio=0.1):
+                 num_classes,
+                 input_size,
+                 input_channels,
+                 patch_size,
+                 dim,
+                 depth,
+                 head,
+                 win_size,
+                 dropout_ratio,
+                 **kwargs):
         super(SwinT, self).__init__()
         self.num_classes = num_classes
         self.input_size = input_size
@@ -42,6 +43,7 @@ class SwinT(nn.Module):
         self.head = head
         self.win_size = win_size
         self.dropout_ratio = dropout_ratio
+        self.kwargs = kwargs
 
         self.PatchEmbedding = nn.Linear(self.input_channels, self.dim)
         self.PatchMerging = nn.ModuleDict({str(stage): PatchMerging(kernal_size=self.patch_size,
@@ -104,6 +106,7 @@ class SwinT(nn.Module):
         feats = self.Globe_AvgPool(feats.permute(0, 3, 1, 2)).reshape(batch_size, -1)
         feats = self.Classifer(feats)
         return feats
+
 
 if __name__ == '__main__':
     model = SwinT()

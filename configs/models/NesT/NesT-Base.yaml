@@ -1,0 +1,10 @@
+model_type: NesT
+num_classes: 10
+input_size: 224
+input_channel: 3
+patch_size: 1
+depth: 5
+dim: 768
+block_depth: [ 2, 2, 2, 2 ]
+head: 12
+dropout_ratio: 0

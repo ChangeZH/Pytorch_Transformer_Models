@@ -26,15 +26,16 @@ class NesT(nn.Module):
     """docstring for NesT"""
 
     def __init__(self,
-                 num_classes=10,
-                 input_size=32,
-                 input_channel=3,
-                 patch_size=1,
-                 depth=3,
-                 dim=192,
-                 block_depth=[4, 4, 4],
-                 head=3,
-                 dropout_ratio=0.1):
+                 num_classes,
+                 input_size,
+                 input_channel,
+                 patch_size,
+                 depth,
+                 dim,
+                 block_depth,
+                 head,
+                 dropout_ratio,
+                 **kwargs):
         super(NesT, self).__init__()
         self.num_classes = num_classes
         self.input_size = input_size
@@ -45,6 +46,7 @@ class NesT(nn.Module):
         self.block_depth = block_depth
         self.head = head
         self.dropout_ratio = dropout_ratio
+        self.kwargs = kwargs
 
         self.block_num = {i: 4 ** (len(self.block_depth) - i - 1) for i in range(len(self.block_depth))}
         self.agg_index = [i for i in range(len(self.block_depth) - 1)]

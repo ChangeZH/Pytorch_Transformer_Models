@@ -1,0 +1,9 @@
+model_type: ResT
+num_classes: 10
+input_size: 224
+input_channel: 3
+patch_size: 1
+dim: 96
+depth: [ 2, 2, 6, 2, ]
+head: [ 1, 2, 4, 8 ]
+dropout_ratio: 0
